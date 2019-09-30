@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'post.dart';
+
 void main() => runApp(new Application());
 
 class Application extends StatelessWidget {
@@ -19,6 +21,22 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>{
+
+  final PostState postState =  new PostState();
+
+  @override
+  void initState(){
+    super.initState();
+    getPosts();
+  }
+
+  _getPosts() async {
+    if(!mounted) return;
+
+    await postState.getFromApi();
+    setState((){});
+  }
+
   Widget _getLoadingStateWidget(){
     return new Center(
       child : new CircularProgressIndicator()
@@ -27,8 +45,28 @@ class _MainPageState extends State<MainPage>{
 
   Widget getCurrentStateWidget(){
     Widget currentStateWidget;
-    currentStateWidget = _getLoadingStateWidget();
+    if(!postState.error && !postState.loading){
+      currentStateWidget = _getSuccessStateWidget();
+    }else{
+      currentStateWidget = _getLoadingStateWidget();
+    }
     return currentStateWidget;
+  }
+
+  Widget _getSuccessStateWidget(){
+    return new ListView.builder(
+      itemCount : postState.posts.length,
+      itemBuilder : (context, index){
+        return new Column(
+          crossAxisAlignment : CrossAxisAlignment.start,
+          children : <Widget>[
+            new Text(postState.posts[index].title, style : new TextStyle(FontWeight.bold)),
+            new Text(postState.posts[index].body),
+            new Divider()
+          ]
+        );
+      },
+    );
   }
 
   @override
